@@ -13,7 +13,6 @@ services:
     ports:
      - "8888:8888"
     volumes:
-      # - ./hue.ini:/usr/share/hue/desktop/conf/hue.ini
       - ./pseudo-distributed.ini:/usr/share/hue/desktop/conf/pseudo-distributed.ini
 
   namenode:
