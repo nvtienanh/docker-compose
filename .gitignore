@@ -15,6 +15,6 @@ spark
 spark-ozone
 workbench
 yarn
-zeppelin
 zeppelin-ldap
+zeppelin
 zookeeper
