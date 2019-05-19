@@ -6,6 +6,8 @@ hbase
 hdfs
 hive
 hue/data
+zeppelin/data
+zeppelin/notebook
 hivellap
 kerberos
 ozone
@@ -15,6 +17,4 @@ spark
 spark-ozone
 workbench
 yarn
-zeppelin-ldap
-zeppelin
 zookeeper

@@ -1,0 +1,120 @@
+version: "3"
+
+services:
+  namenode:
+    image: nvtienanh/hadoop-namenode:${HADOOP_TAG}
+    container_name: namenode
+    volumes:
+      - ./data/namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+    env_file:
+      - ./hadoop.env
+    healthcheck:
+      interval: 5s
+      retries: 100 
+    networks:
+      - spark-net
+  datanode:
+    image: nvtienanh/hadoop-datanode:${HADOOP_TAG}
+    container_name: datanode
+    volumes:
+      - ./data/datanode:/hadoop/dfs/data
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+    env_file:
+      - ./hadoop.env
+    depends_on:
+      - namenode
+    healthcheck:
+      interval: 5s
+      retries: 100 
+    networks:
+      - spark-net
+  spark-master:
+    image: nvtienanh/spark-master:${SPARK_TAG}
+    container_name: spark-master
+    ports:
+      # - "8080:8080"
+      - "7077:7077"
+    # environment:
+    #   - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+    env_file:
+      - ./hadoop.env
+    depends_on:
+      - namenode
+      - datanode
+    healthcheck:
+      interval: 5s
+      retries: 100 
+    networks:
+      - spark-net
+  spark-worker:
+    image: nvtienanh/spark-worker:${SPARK_TAG}
+    container_name: spark-worker
+    # environment:
+    #   - "SPARK_MASTER=spark://spark-master:7077"
+    #   - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+    env_file:
+      - ./hadoop.env
+    depends_on:
+      - spark-master
+    healthcheck:
+      interval: 5s
+      retries: 100 
+    networks:
+      - spark-net
+  zeppelin:
+    image: nvtienanh/zeppelin:${ZEPPELIN_TAG}
+    container_name: zeppelin
+    ports:
+      - 8080:8080
+    volumes:
+      - ./notebook:/opt/zeppelin/notebook
+    # environment:
+    #   CORE_CONF_fs_defaultFS: "hdfs://namenode:8020"
+    #   SPARK_MASTER: "spark://spark-master:7077"
+    #   MASTER: "spark://spark-master:7077"
+      #SPARK_SUBMIT_OPTIONS: "--jars /opt/sansa-examples/jars/sansa-examples-spark-2016-12.jar"
+    env_file:
+      - ./hadoop.env
+    volumes:
+      - ./shiro.ini:/opt/zeppelin/conf/shiro.ini
+    depends_on:
+      - spark-master
+      - namenode
+    networks:
+      - spark-net
+  hue:
+    image: nvtienanh/hue:${HUE_TAG}
+    hostname: hue
+    container_name: hue
+    networks:
+      - spark-net
+    environment:
+      - NAMENODE_HOST=namenode
+    ports:
+     - "8888:8888"
+    volumes:
+      - ./pseudo-distributed.ini:/usr/share/hue/desktop/conf/pseudo-distributed.ini
+  ldap:
+    hostname: ldap
+    image: osixia/openldap:1.2.4
+    container_name: openldap
+    networks:
+      - spark-net  
+  ldapweb:
+    image: osixia/phpldapadmin:0.7.2
+    container_name: phpldapadmin
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: ldap
+    ports:
+      - 6443:443
+    networks:
+      - spark-net
+
+networks:
+  spark-net:
+    external:
+      name: spark-net
