@@ -97,6 +97,40 @@ services:
     container_name: hive-metastore-postgresql
     networks:
       - hadoop-net
+  mysql-database:
+    image: mysql:5.7
+    hostname: mysql-database
+    container_name: mysql-database
+    ports:
+      - "33061:3306"
+    command: --init-file /data/application/init.sql
+    volumes:
+      - data_mysql:/var/lib/mysql
+      - ./init.sql:/data/application/init.sql
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: hue
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+    networks:
+      - hadoop-net
+  ldap:
+    hostname: ldap
+    container_name: ldap
+    image: osixia/openldap:1.2.4
+    networks:
+      - hadoop-net
+  
+  ldapweb:
+    image: osixia/phpldapadmin:0.7.2
+    container_name: ldapadmin
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: ldap
+    ports:
+      - 6443:443
+    networks:
+      - hadoop-net
   # solr:
   #   image: solr:latest
   #   hostname: solr

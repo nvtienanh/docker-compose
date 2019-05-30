@@ -4,20 +4,27 @@ Docker-compose là một công cụ tuyệt vời để định nghĩa và chạ
 
 ## Sử dụng
 
-To deploy an example HDFS cluster, run:
+Để Run các container, chạy lệnh:
 ```
-  docker-compose up -d
-```
-
-
-Or deploy in swarm:
-```
-docker stack deploy -c docker-compose-v3.yml hadoop
+  make up
 ```
 
-`docker-compose` creates a docker network that can be found by running `docker network list`, e.g. `dockerhadoop_default`.
+Nếu bạn start thành công thì terminal sẽ hiện ra có dạng:
 
-Run `docker network inspect` on the network (e.g. `docker-hadoop_default`) to find the IP the hadoop interfaces are published on. Access these interfaces with the following URLs:
+```bash
+$ make up
+mkdir -p data
+docker network create hadoop-net
+be8211c3229a3d811d0b5f85d3184d2349bc58558f698ab8c0957cd10b0a18d5
+docker-compose up -d
+Creating namenode        ... done
+Creating datanode        ... done
+Creating historyserver   ... done
+Creating nodemanager     ... done
+Creating resourcemanager ... done
+```
+
+Truy cập vào các ứng dụng của Hadoop:
 
 * Namenode: http://localhost:9870/dfshealth.html#tab-overview
 * History server: http://localhost:8188/applicationhistory
@@ -25,16 +32,40 @@ Run `docker network inspect` on the network (e.g. `docker-hadoop_default`) to fi
 * Nodemanager: http://localhost:8042/node
 * Resource manager: http://localhost:8088/
 
-## Configure Environment Variables
+Để Stop các container, chạy lệnh:
+```
+  make down
+```
+Khi đó terminal sẽ trả về:
+```bash
+$ make down
+docker-compose down
+Stopping datanode        ... done
+Stopping namenode        ... done
+Stopping historyserver   ... done
+Stopping resourcemanager ... done
+Stopping nodemanager     ... done
+Removing datanode        ... done
+Removing namenode        ... done
+Removing historyserver   ... done
+Removing resourcemanager ... done
+Removing nodemanager     ... done
+Network hadoop-net is external, skipping
+docker network rm hadoop-net
+hadoop-net
+rm -rf data
+```
+
+## Cấu hình Environment
 
 The configuration parameters can be specified in the hadoop.env file or as environmental variables for specific services (e.g. namenode, datanode etc.):
 ```
-  CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+  CORE_CONF_fs_defaultFS=hdfs://namenode:9000
 ```
 
-CORE_CONF corresponds to core-site.xml. fs_defaultFS=hdfs://namenode:8020 will be transformed into:
+CORE_CONF corresponds to core-site.xml. fs_defaultFS=hdfs://namenode:9000 will be transformed into:
 ```
-  <property><name>fs.defaultFS</name><value>hdfs://namenode:8020</value></property>
+  <property><name>fs.defaultFS</name><value>hdfs://namenode:9000</value></property>
 ```
 To define dash inside a configuration parameter, use triple underscore, such as YARN_CONF_yarn_log___aggregation___enable=true (yarn-site.xml):
 ```

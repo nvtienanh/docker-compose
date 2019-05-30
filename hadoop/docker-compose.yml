@@ -4,60 +4,80 @@ services:
   namenode:
     image: nvtienanh/hadoop-namenode:${HADOOP_TAG}
     container_name: namenode
+    hostname: namenode
     volumes:
-      - hadoop_namenode:/hadoop/dfs/name
+      - ./data/namenode:/hadoop/dfs/name
     environment:
       - CLUSTER_NAME=test
     ports:
       - 9870:9870
     env_file:
       - ./hadoop.env
+    networks:
+      - hadoop-net
 
   datanode:
     image: nvtienanh/hadoop-datanode:${HADOOP_TAG}
     container_name: datanode
+    hostname: datanode
     volumes:
-      - hadoop_datanode:/hadoop/dfs/data
+      - ./data/datanode:/hadoop/dfs/name
     environment:
       SERVICE_PRECONDITION: "namenode:9870"
     ports:
       - 9864:9864
     env_file:
       - ./hadoop.env
+    networks:
+      - hadoop-net
   
   resourcemanager:
     image: nvtienanh/hadoop-resourcemanager:${HADOOP_TAG}
     container_name: resourcemanager
+    hostname: resourcemanager
     environment:
       SERVICE_PRECONDITION: "namenode:9870 datanode:9864"
     ports:
       - 8088:8088
     env_file:
       - ./hadoop.env
+    networks:
+      - hadoop-net
 
-  nodemanager1:
+  nodemanager:
     image: nvtienanh/hadoop-nodemanager:${HADOOP_TAG}
     container_name: nodemanager
+    hostname: nodemanager
     environment:
       SERVICE_PRECONDITION: "namenode:9870 datanode:9864 resourcemanager:8088"
     ports:
       - 8042:8042
     env_file:
       - ./hadoop.env
+    networks:
+      - hadoop-net
   
   historyserver:
     image: nvtienanh/hadoop-historyserver:${HADOOP_TAG}
     container_name: historyserver
+    hostname: historyserver
     environment:
       SERVICE_PRECONDITION: "namenode:9870 datanode:9864 resourcemanager:8088"
     volumes:
-      - hadoop_historyserver:/hadoop/yarn/timeline
+      - ./data/historyserver:/hadoop/yarn/timeline
     ports:
       - 8188:8188
     env_file:
       - ./hadoop.env
+    networks:
+      - hadoop-net
   
-volumes:
-  hadoop_namenode:
-  hadoop_datanode:
-  hadoop_historyserver:
+# volumes:
+#   hadoop_namenode:
+#   hadoop_datanode:
+#   hadoop_historyserver:
+
+networks:
+  hadoop-net:
+    external:
+      name: hadoop-net
