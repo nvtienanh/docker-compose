@@ -58,21 +58,25 @@ rm -rf data
 
 ## Cấu hình Environment
 
-The configuration parameters can be specified in the hadoop.env file or as environmental variables for specific services (e.g. namenode, datanode etc.):
+Các cấu hình được để ở trong file hadoop.env, mỗi thông số cài đặt là 1 dòng, ví dự:
 ```
   CORE_CONF_fs_defaultFS=hdfs://namenode:9000
 ```
 
-CORE_CONF corresponds to core-site.xml. fs_defaultFS=hdfs://namenode:9000 will be transformed into:
+Tiền tố CORE_CONF để chỉ việc cấu hình cho file core-site.xml. fs_defaultFS=hdfs://namenode:9000 là thông số cấu hình, dòng trên sẽ được chuyển thành:
 ```
   <property><name>fs.defaultFS</name><value>hdfs://namenode:9000</value></property>
 ```
-To define dash inside a configuration parameter, use triple underscore, such as YARN_CONF_yarn_log___aggregation___enable=true (yarn-site.xml):
+Hoặc ví dụ khác khi muốn cấu hình file yarn-site.xml
+```
+YARN_CONF_yarn_log___aggregation___enable=true:
+```
+thì tương ứng với việc cấu hình
 ```
   <property><name>yarn.log-aggregation-enable</name><value>true</value></property>
 ```
 
-The available configurations are:
+Các file cấu hình:
 * /etc/hadoop/core-site.xml CORE_CONF
 * /etc/hadoop/hdfs-site.xml HDFS_CONF
 * /etc/hadoop/yarn-site.xml YARN_CONF
@@ -80,7 +84,7 @@ The available configurations are:
 * /etc/hadoop/kms-site.xml KMS_CONF
 * /etc/hadoop/mapred-site.xml  MAPRED_CONF
 
-If you need to extend some other configuration file, refer to base/entrypoint.sh bash script.
+Nếu bạn muốn cài đặt thêm các cấu hình khác, vui lòng thêm ở trong file /entrypoint.sh .
 
 ## Liên hệ
 * Anh Nguyen [@nvtienanh](https://github.com/nvtienanh) 
