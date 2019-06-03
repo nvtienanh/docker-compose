@@ -71,11 +71,6 @@ services:
       - ./hadoop.env
     networks:
       - hadoop-net
-  
-# volumes:
-#   hadoop_namenode:
-#   hadoop_datanode:
-#   hadoop_historyserver:
 
 networks:
   hadoop-net:

@@ -12,73 +12,8 @@ services:
     ports:
      - "8888:8888"
     volumes:
-      - ./pseudo-distributed.ini:/usr/share/hue/desktop/conf/pseudo-distributed.ini
-
-  namenode:
-    image: nvtienanh/hadoop-namenode:${HADOOP_TAG}
-    hostname: namenode
-    container_name: namenode
-    networks:
-      - hadoop-net
-    volumes:
-      - ./data/namenode:/hadoop/dfs/name
-    environment:
-      - CLUSTER_NAME=test
-    env_file:
-      - ./hadoop.env
-
-  datanode1:
-    image: nvtienanh/hadoop-datanode:${HADOOP_TAG}
-    hostname: datanode1
-    container_name: datanode1
-    networks:
-      - hadoop-net
-    volumes:
-      - ./data/datanode1:/hadoop/dfs/data
-    env_file:
-      - ./hadoop.env
+      - ./hue.ini:/hue/desktop/conf/hue.ini
   
-  datanode2:
-    image: nvtienanh/hadoop-datanode:${HADOOP_TAG}
-    hostname: datanode2
-    container_name: datanode2
-    networks:
-      - hadoop-net
-    volumes:
-      - ./data/datanode2:/hadoop/dfs/data
-    env_file:
-      - ./hadoop.env
-    
-  historyserver:
-    image: nvtienanh/hadoop-historyserver:${HADOOP_TAG}
-    container_name: historyserver
-    environment:
-      SERVICE_PRECONDITION: "namenode:9870 datanode:9864 resourcemanager:8088"
-    volumes:
-      - hadoop_historyserver:/hadoop/yarn/timeline
-    env_file:
-      - ./hadoop.env
-  
-  ldap:
-    hostname: ldap
-    container_name: ldap
-    image: osixia/openldap:1.2.4
-    networks:
-      - hadoop-net
-  
-  ldapweb:
-    image: osixia/phpldapadmin:0.7.2
-    container_name: ldapadmin
-    environment:
-      PHPLDAPADMIN_LDAP_HOSTS: ldap
-    ports:
-      - 6443:443
-    networks:
-      - hadoop-net
-volumes:
-  hadoop_namenode:
-  hadoop_datanode:
-  hadoop_historyserver:
 networks:
   hadoop-net:
     external:
