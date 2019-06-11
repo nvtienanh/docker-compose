@@ -5,6 +5,7 @@ services:
     image: nvtienanh/hue:${HUE_TAG}
     hostname: hue
     container_name: hue
+    domainname: hadoop
     networks:
       - hadoop-net
     environment:
@@ -12,8 +13,60 @@ services:
     ports:
      - "8888:8888"
     volumes:
-      - ./hue.ini:/hue/desktop/conf/hue.ini
+      - ./pseudo-distributed.ini:/usr/share/hue/desktop/conf/pseudo-distributed.ini
+
+  namenode:
+    image: nvtienanh/hadoop-namenode:${HADOOP_TAG}
+    hostname: namenode
+    container_name: namenode
+    domainname: hadoop
+    networks:
+      - hadoop-net
+    volumes:
+      - ./data/namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop.env
+
+  datanode1:
+    image: nvtienanh/hadoop-datanode:${HADOOP_TAG}
+    hostname: datanode1
+    container_name: datanode1
+    domainname: hadoop
+    networks:
+      - hadoop-net
+    volumes:
+      - ./data/datanode1:/hadoop/dfs/data
+    env_file:
+      - ./hadoop.env
+
+  datanode2:
+    image: nvtienanh/hadoop-datanode:${HADOOP_TAG}
+    hostname: datanode2
+    container_name: datanode2
+    domainname: hadoop
+    networks:
+      - hadoop-net
+    volumes:
+      - ./data/datanode2:/hadoop/dfs/data
+    env_file:
+      - ./hadoop.env
   
+  ldap:
+    hostname: ldap
+    image: osixia/openldap:1.2.4
+    networks:
+      - hadoop-net
+  
+  ldapweb:
+    image: osixia/phpldapadmin:0.7.2
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: ldap
+    ports:
+      - 6443:443
+    networks:
+      - hadoop-net
 networks:
   hadoop-net:
     external:

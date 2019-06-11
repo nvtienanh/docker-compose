@@ -13,6 +13,7 @@ services:
      - "8888:8888"
     volumes:
       - ./pseudo-distributed.ini:/usr/share/hue/desktop/conf/pseudo-distributed.ini
+      # - ./pseudo-distributed.ini:/usr/share/hue/desktop/conf/z-hue.ini
   namenode:
     image: nvtienanh/hadoop-namenode:${HADOOP_TAG}
     hostname: namenode
@@ -73,9 +74,10 @@ services:
       - hadoop-net
     env_file:
       - ./hadoop-hive.env
+    # command: /opt/hive/bin/hive --service hiveserver2
     environment:
-      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
       SERVICE_PRECONDITION: "hive-metastore:9083"
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
     ports:
       - "10000:10000"
   hive-metastore:
@@ -103,6 +105,9 @@ services:
     container_name: postgresql-database
     networks:
       - hadoop-net
+
+volumes:
+  data:
 
 networks:
   hadoop-net:
