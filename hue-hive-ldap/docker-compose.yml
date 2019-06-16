@@ -1,0 +1,132 @@
+version: "3"
+
+services:
+  hue:
+    image: nvtienanh/hue:${HUE_TAG}
+    hostname: hue
+    container_name: hue
+    networks:
+      - hadoop-net
+    environment:
+      - NAMENODE_HOST=namenode
+    env_file:
+      - ./hadoop-hive.env
+    ports:
+     - "8888:8888"
+    volumes:
+      - ./pseudo-distributed.ini:/usr/share/hue/desktop/conf/pseudo-distributed.ini
+      # - ./pseudo-distributed.ini:/usr/share/hue/desktop/conf/z-hue.ini
+  namenode:
+    image: nvtienanh/hadoop-namenode:${HADOOP_TAG}
+    hostname: namenode
+    container_name: namenode
+    networks:
+      - hadoop-net
+    volumes:
+      - ./data/namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop-hive.env
+    ports:
+      - "9870:9870"
+  datanode:
+    image: nvtienanh/hadoop-datanode:${HADOOP_TAG}
+    hostname: datanode
+    container_name: datanode
+    networks:
+      - hadoop-net
+    volumes:
+      - ./data/datanode:/hadoop/dfs/data
+    env_file:
+      - ./hadoop-hive.env
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    ports:
+      - "9864:9864"
+  historyserver:
+    image: nvtienanh/hadoop-historyserver:${HADOOP_TAG}
+    hostname: historyserver
+    container_name: historyserver
+    networks:
+      - hadoop-net
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870 datanode:9864 resourcemanager:8088"
+    volumes:
+      - ./data/hadoop_historyserver:/hadoop/yarn/timeline
+    env_file:
+      - ./hadoop-hive.env
+  resourcemanager:
+    image: nvtienanh/hadoop-resourcemanager:${HADOOP_TAG}
+    hostname: resourcemanager
+    container_name: resourcemanager
+    networks:
+      - hadoop-net
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870 datanode:9864"
+    ports:
+      - 8088:8088
+    env_file:
+      - ./hadoop-hive.env
+  hive-server:
+    image: nvtienanh/hive:${HIVE_TAG}
+    hostname: hive-server
+    container_name: hive-server
+    networks:
+      - hadoop-net
+    env_file:
+      - ./hadoop-hive.env
+    # command: /opt/hive/bin/hive --service hiveserver2
+    environment:
+      SERVICE_PRECONDITION: "hive-metastore:9083"
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
+    ports:
+      - "10000:10000"
+  hive-metastore:
+    image: nvtienanh/hive:${HIVE_TAG}
+    hostname: hive-metastore
+    container_name: hive-metastore
+    networks:
+      - hadoop-net
+    env_file:
+      - ./hadoop-hive.env
+    command: /opt/hive/bin/hive --service metastore
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870 datanode:9864 hive-metastore-postgresql:5432"
+    ports:
+      - "9083:9083"
+  hive-metastore-postgresql:
+    image: nvtienanh/metastore:${METASTORE_TAG}
+    hostname: hive-metastore-postgresql
+    container_name: hive-metastore-postgresql
+    networks:
+      - hadoop-net
+  postgresql-database:
+    image: nvtienanh/postgresql:${POSTGRESQL_TAG}
+    hostname: postgresql-database
+    container_name: postgresql-database
+    networks:
+      - hadoop-net
+  ldap:
+    hostname: ldap
+    container_name: ldap
+    image: osixia/openldap:1.2.4
+    networks:
+      - hadoop-net  
+  ldapweb:
+    image: osixia/phpldapadmin:0.7.2
+    container_name: ldapadmin
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: ldap
+    ports:
+      - 6443:443
+    networks:
+      - hadoop-net
+
+volumes:
+  data:
+
+networks:
+  hadoop-net:
+    external:
+      name: hadoop-net

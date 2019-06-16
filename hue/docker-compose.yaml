@@ -5,7 +5,6 @@ services:
     image: nvtienanh/hue:${HUE_TAG}
     hostname: hue
     container_name: hue
-    domainname: hadoop
     networks:
       - hadoop-net
     environment:
@@ -19,7 +18,6 @@ services:
     image: nvtienanh/hadoop-namenode:${HADOOP_TAG}
     hostname: namenode
     container_name: namenode
-    domainname: hadoop
     networks:
       - hadoop-net
     volumes:
@@ -33,40 +31,37 @@ services:
     image: nvtienanh/hadoop-datanode:${HADOOP_TAG}
     hostname: datanode1
     container_name: datanode1
-    domainname: hadoop
     networks:
       - hadoop-net
     volumes:
       - ./data/datanode1:/hadoop/dfs/data
     env_file:
       - ./hadoop.env
-
+  
   datanode2:
     image: nvtienanh/hadoop-datanode:${HADOOP_TAG}
     hostname: datanode2
     container_name: datanode2
-    domainname: hadoop
     networks:
       - hadoop-net
     volumes:
       - ./data/datanode2:/hadoop/dfs/data
     env_file:
       - ./hadoop.env
-  
-  ldap:
-    hostname: ldap
-    image: osixia/openldap:1.2.4
-    networks:
-      - hadoop-net
-  
-  ldapweb:
-    image: osixia/phpldapadmin:0.7.2
+    
+  historyserver:
+    image: nvtienanh/hadoop-historyserver:${HADOOP_TAG}
+    container_name: historyserver
     environment:
-      PHPLDAPADMIN_LDAP_HOSTS: ldap
-    ports:
-      - 6443:443
-    networks:
-      - hadoop-net
+      SERVICE_PRECONDITION: "namenode:9870 datanode:9864 resourcemanager:8088"
+    volumes:
+      - ./data/hadoop_historyserver:/hadoop/yarn/timeline
+    env_file:
+      - ./hadoop.env
+  
+volumes:
+  data:
+
 networks:
   hadoop-net:
     external:

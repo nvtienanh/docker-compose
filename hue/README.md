@@ -15,41 +15,15 @@ make down
 
 ## Tạo user đăng nhập vào Hue
 
-Truy cập vào LDAP Admin webui url: https://localhost:6443
+Truy cập vào LDAP Admin webui url: https://localhost:8888. Tại lần đầu tiên đăng nhập bạn sẽ được yêu cầu tạo tài khoản
+![alt text](assets/hue-create-account.png "Tạo tài khoản")
 
-Đăng nhập vào với thông tin addmin user:
+Sau khi truy cập xong, bạn có thể thử tính năng **File Browser** để upload 1 file lên
+![alt text](assets/hue-file-browser.png "Upload file")
 
- * User: cn=admin,dc=example,dc=org
- * Password: admin
+Các tính năng khác các bạn có thể thay đổi trong file pseudo-distributed.ini
 
-Sau khi đã năng nhập, tạo user Hue:
+## Liên hệ
 
-```
-dn: uid=nvtienanh,dc=example,dc=org
-cn: ServiceAccount
-ou: People
-displayname: Test Bela
-givenname: Firstname
-mail: nvtienanh@example.org
-objectclass: top
-objectclass: person
-objectclass: organizationalPerson
-objectclass: inetOrgPerson
-sn: Lastname
-uid: nvtienanh
-userpassword: 12345
-```
-
-Tạo group:
-
-```
-dn: cn=hue,dc=example,dc=org
-objectClass: top
-objectClass: groupOfNames
-cn: hue
-member: uid=nvtienanh,dc=example,dc=org
-```
-
-## Đăng nhập vào Hue
-
-Truy cập thông qua địa chỉ: http://localhost:8888 và sử dụng thông tin account vừa tạo để đang nhập
+- Anh Nguyen [@nvtienanh](https://github.com/nvtienanh)
+- [nvtienanh.info](https://nvtienanh.info)
